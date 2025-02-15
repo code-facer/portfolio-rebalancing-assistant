@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Rebalancing Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Portfolio Rebalancing Assistant</h1>
+  </header>
+  <form id="investment-form">
+    <table>
+      <thead>
+        <tr>
+          <th>Current Position</th>
+          <th>Current Allocation (%)</th>
+          <th>Target Allocation (%)</th>
+          <th>Next Purchase</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rows-container">
+        <tr>
+          <td><input type="text" class="position" placeholder="Current Position"></td>
+          <td><label class="current-allocation result">0%</label></td>
+          <td><input type="text" class="allocation" placeholder="Target Allocation (%)"></td>
+          <td><label class="next-purchase result">$0</label></td>
+          <td><button type="button" class="delete-row">X</button></td>
+        </tr>
+        <tr>
+          <td><input type="text" class="position" placeholder="Current Position"></td>
+          <td><label class="current-allocation result">0%</label></td>
+          <td><input type="text" class="allocation" placeholder="Target Allocation (%)"></td>
+          <td><label class="next-purchase result">$0</label></td>
+          <td><button type="button" class="delete-row">X</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" id="add-row">Add Row</button>
+    <div class="input-group">
+      <label for="next-purchase">Enter next purchase value:</label>
+      <input type="number" id="next-purchase" placeholder="e.g. 500">
+    </div>
+  </form>
+  <script src="script.js"></script>
+</body>
+</html>
