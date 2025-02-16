@@ -1,109 +1,160 @@
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-row').addEventListener('click', addRow);
-  document.getElementById('investment-form').addEventListener('input', rebalancePortfolio);
-  rebalancePortfolio();
+  document.getElementById('calculate').addEventListener('click', rebalancePortfolio);
+  document.getElementsByClassName('position').item(0).addEventListener('input', updateCurrentAllocations);
 });
+
+function updateCurrentAllocations() {
+  const positions = getPositions();
+  const total = positions.reduce((acc, val) => acc + val, 0);
+  const allocations = positions.map(pos => total ? (pos / total) * 100 : 0);
+  displayCurrentAllocations(allocations);
+}
 
 function addRow() {
   const row = document.createElement('tr');
   row.innerHTML = `
-    <td><input type="text" class="position" placeholder="Current Position"></td>
-    <td><label class="current-allocation result">0%</label></td>
-    <td><input type="text" class="allocation" placeholder="Target Allocation (%)"></td>
+    <td><input type="number" class="position" placeholder="Current Position"></td>
+    <td><label class="current-allocation result">0.00%</label></td>
+    <td><input type="number" class="allocation" placeholder="Target Allocation (%)"></td>
     <td><label class="next-purchase result">$0</label></td>
     <td><button type="button" class="delete-row">X</button></td>
   `;
   row.querySelector('.delete-row').addEventListener('click', () => {
     row.remove();
-    rebalancePortfolio();
+    updateCurrentAllocations();
   });
+  row.querySelector('.position').addEventListener('input', updateCurrentAllocations);
   document.getElementById('rows-container').appendChild(row);
 }
 
-function rebalancePortfolio() {
-  const rows = document.querySelectorAll('#rows-container tr');
-  const positions = Array.from(rows).map(row => Number(row.querySelector('.position').value) || 0);
-  const allocations = Array.from(rows).map(row => Number(row.querySelector('.allocation').value) || 0);
-  const nextPurchase = Number(document.getElementById('next-purchase').value) || 0;
-  let totalValue = positions.reduce((acc, val) => acc + val, 0);
-  let currentAllocations = positions.map(pos => totalValue ? (pos / totalValue) * 100 : 0);
-  let deviations = allocations.map((alloc, index) => alloc - currentAllocations[index]);
+function getRows() {
+  return document.querySelectorAll('#rows-container tr');
+}
 
-  rows.forEach((row, index) => {
-    row.querySelector('.current-allocation').textContent = currentAllocations[index].toFixed(2) + '%';
+function getPositions() {
+  return Array.from(getRows()).map(row => Number(row.querySelector('.position').value) || 0);
+}
+
+function getDesiredAllocations() {
+  return Array.from(getRows()).map(row => Number(row.querySelector('.allocation').value) || 0);
+}
+
+function getNextPurchase() {
+  return Number(document.getElementById('next-purchase').value) || 0;
+}
+
+function setAllocationError() {
+  Array.from(getRows()).forEach(row => {
+    row.querySelector('.allocation').id = 'error-border';
+  });
+}
+
+function unsetAllocationError() {
+  Array.from(document.querySelectorAll('#error-border')).forEach(input => {
+    input.removeAttribute('id');
+  });
+}
+
+function rebalancePortfolio() {
+
+  if (checkTargetAllocations() === false) {
+    setAllocationError();
+    alert('Target allocations must be between 0% and 100% and sum to 100%');
+    return;
+  }
+
+  unsetAllocationError();
+
+  const positions = getPositions();
+  const desiredAllocations = getDesiredAllocations();
+  const nextPurchase = getNextPurchase();
+
+  const currentTotal = positions.reduce((acc, val) => acc + val, 0);
+  const currentAllocations = positions.map(pos => currentTotal ? (pos / currentTotal) * 100 : 0);
+  displayCurrentAllocations(currentAllocations);
+  
+  const newTotal = nextPurchase + currentTotal;
+  const desiredPositions = getDesiredPositions(newTotal, desiredAllocations);
+  const deviations = desiredPositions.map((pos, index) => pos - positions[index]);
+
+  const underweightDeviations = deviations
+    .map((deviation, index) => ({ deviation, index }))
+    .filter(item => item.deviation >= 0);
+
+  let nextPurchases = Array(positions.length).fill(0);
+
+  if (underweightDeviations.length === deviations.length) {
+    nextPurchases = underweightDeviations.map(item => item.deviation);
+  } else if (underweightDeviations.length > 0) {
+    nextPurchases = getPartialRebalancePurchases(nextPurchase, underweightDeviations, positions.length);
+  }
+
+  displayNextPurchases(nextPurchases);
+}
+
+function checkTargetAllocations() {
+  const allocations = getDesiredAllocations();
+  let total = 0;
+
+  allocations.forEach(alloc => {
+    if (alloc < 0 || alloc > 100) {
+      return false;
+    }
+    total += alloc;
   });
 
-  let remainingPurchase = nextPurchase;
-  const nextPurchases = new Array(rows.length).fill(0);
+  return total === 100;
+}
+
+function getPartialRebalancePurchases(remainingPurchase, underweightDeviations, numberOfPositions) {
+  const nextPurchases = new Array(numberOfPositions).fill(0);
+  const sortedDeviations = underweightDeviations.sort((a, b) => b.deviation - a.deviation);
 
   while (remainingPurchase > 0) {
-    const positiveDeviations = deviations
-      .map((deviation, index) => ({ deviation, index }))
-      .filter(item => item.deviation > 0)
-      .sort((a, b) => b.deviation - a.deviation);
+    const minDeviation = sortedDeviations[0].deviation;
+    const group = sortedDeviations.filter(item => item.deviation === minDeviation);
+    const groupIndices = group.map(item => item.index);
 
-    if (positiveDeviations.length === 0) break;
+    const amountToAdd = Math.min(
+      remainingPurchase,
+      sortedDeviations[1] ? sortedDeviations[1].deviation - minDeviation : minDeviation
+    );
 
-    if (positiveDeviations.length === 1) {
-      const maxDeviationIndex = positiveDeviations[0].index;
-      const amountToAdd = Math.min(
-        remainingPurchase,
-        Math.max(1, Math.round(positiveDeviations[0].deviation * totalValue / 100))
-      );
-
-      nextPurchases[maxDeviationIndex] += amountToAdd;
+    groupIndices.forEach(index => {
+      nextPurchases[index] += amountToAdd;
       remainingPurchase -= amountToAdd;
-
-      positions[maxDeviationIndex] += amountToAdd;
-      totalValue += amountToAdd;
-      currentAllocations = positions.map(pos => totalValue ? (pos / totalValue) * 100 : 0);
-      deviations = allocations.map((alloc, index) => alloc - currentAllocations[index]);
-    } else {
-      const maxDeviation = positiveDeviations[0].deviation;
-      const nextDeviation = positiveDeviations[1] ? positiveDeviations[1].deviation : 0;
-      const maxDeviationIndex = positiveDeviations[0].index;
-
-      const amountToAdd = Math.min(
-        remainingPurchase,
-        Math.max(1, Math.round((nextDeviation - maxDeviation) * totalValue / 100))
-      );
-
-      nextPurchases[maxDeviationIndex] += amountToAdd;
-      remainingPurchase -= amountToAdd;
-
-      positions[maxDeviationIndex] += amountToAdd;
-      totalValue += amountToAdd;
-      currentAllocations = positions.map(pos => totalValue ? (pos / totalValue) * 100 : 0);
-      deviations = allocations.map((alloc, index) => alloc - currentAllocations[index]);
-    }
-  }
-
-  if (remainingPurchase > 0) {
-    const equalShare = Math.floor(remainingPurchase / rows.length);
-    const remainder = remainingPurchase % rows.length;
-
-    nextPurchases.forEach((_, index) => {
-      nextPurchases[index] += equalShare;
+      sortedDeviations.find(item => item.index === index).deviation -= amountToAdd;
     });
-
-    for (let i = 0; i < remainder; i++) {
-      nextPurchases[i] += 1;
-    }
   }
 
-  rows.forEach((row, index) => {
+  return nextPurchases;
+}
+
+function getDesiredPositions(totalValue, desiredAllocations) {
+  let remainingPurchase = totalValue;
+  const positions = Array(desiredAllocations.length).fill(0);
+
+  desiredAllocations.forEach((alloc, index) => {
+    positions[index] = Math.min(
+      remainingPurchase,
+      Math.max(1, Math.round(alloc / 100 * totalValue))
+    );
+
+    remainingPurchase -= positions[index];
+  });
+
+  return positions;
+}
+
+function displayNextPurchases(nextPurchases) {
+  getRows().forEach((row, index) => {
     row.querySelector('.next-purchase').textContent = `$${nextPurchases[index]}`;
   });
 }
 
-// Add delete button event listeners to all rows except the first one
-document.querySelectorAll('#rows-container tr').forEach((row, index) => {
-  if (index > 0) {
-    row.querySelector('.delete-row').addEventListener('click', () => {
-      row.remove();
-      rebalancePortfolio();
-    });
-} else {
-    row.querySelector('.delete-row').style.display = 'none'; // Hide the delete button for the first row
-  }
-});
+function displayCurrentAllocations(currentAllocations) {
+  getRows().forEach((row, index) => {
+    row.querySelector('.current-allocation').textContent = currentAllocations[index].toFixed(2) + '%';
+  });
+}

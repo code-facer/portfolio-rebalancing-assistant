@@ -14,7 +14,7 @@
     <table>
       <thead>
         <tr>
-          <th>Current Position</th>
+          <th>Current Position ($)</th>
           <th>Current Allocation (%)</th>
           <th>Target Allocation (%)</th>
           <th>Next Purchase</th>
@@ -23,25 +23,19 @@
       </thead>
       <tbody id="rows-container">
         <tr>
-          <td><input type="text" class="position" placeholder="Current Position"></td>
-          <td><label class="current-allocation result">0%</label></td>
-          <td><input type="text" class="allocation" placeholder="Target Allocation (%)"></td>
+          <td><input type="number" class="position" placeholder="Current Position"></td>
+          <td><label class="current-allocation result">0.00%</label></td>
+          <td><input type="number" class="allocation" placeholder="Target Allocation (%)"></td>
           <td><label class="next-purchase result">$0</label></td>
-          <td><button type="button" class="delete-row">X</button></td>
-        </tr>
-        <tr>
-          <td><input type="text" class="position" placeholder="Current Position"></td>
-          <td><label class="current-allocation result">0%</label></td>
-          <td><input type="text" class="allocation" placeholder="Target Allocation (%)"></td>
-          <td><label class="next-purchase result">$0</label></td>
-          <td><button type="button" class="delete-row">X</button></td>
+          <td><button type="button" class="delete-row" style="visibility: hidden;">X</button></td>
         </tr>
       </tbody>
     </table>
     <button type="button" id="add-row">Add Row</button>
     <div class="input-group">
       <label for="next-purchase">Enter next purchase value:</label>
-      <input type="number" id="next-purchase" placeholder="e.g. 500">
+      <input type="number" id="next-purchase" placeholder="e.g. $500">
+      <button type="button" id="calculate">Calculate</button>
     </div>
   </form>
   <script src="script.js"></script>
