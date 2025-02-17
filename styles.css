@@ -1,6 +1,14 @@
+:root {
+  --main-color: #0be5da;
+  --secondary-color: #464444;
+  --error-color: #de8282;
+  --font-color: #e0e0e0;
+}
+
 * {
   box-sizing: border-box;
   font-size: medium;
+  text-align: center;
 }
 
 html, body {
@@ -8,8 +16,9 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  font-family: Ubuntu, sans-serif;
+  background: rgb(2,0,36);
+  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(105,9,121,1) 35%, rgba(0,212,255,1) 100%);
   color: #e0e0e0;
   display: flex;
   align-items: center;
@@ -29,7 +38,7 @@ header {
 }
 
 h1 {
-  color: #76c7c0;
+  color: var(--main-color);
   font-size: 2.5em;
   font-weight: bolder;
 }
@@ -41,32 +50,37 @@ form {
   gap: 20px;
 }
 
-
 label {
   display: flex;
   background-color: transparent;
   padding: 10px;
   width: 100%;
   justify-content: center;
+  text-align: center;
+  text-emphasis: strong;
 }
 
 input {
-  background-color: #333;
+  background-color: var(--secondary-color);
   padding: 10px;
-  border: 3px solid #333;
+  border: 3px solid var(--secondary-color);
   border-radius: 5px;
-  color: #e0e0e0;
+  color: var(--font-color);
 }
 
 button {
+  display: flex;
   padding: 10px 20px;
-  border: none;
+  background-color: transparent;
+  border: 3px solid var(--main-color);
   border-radius: 5px;
-  background-color: #76c7c0;
-  color: #121212;
-  font-size: 18px;
+  color: var(--main-color);
   cursor: pointer;
   width: 100%;
+  align-items: center;
+  justify-content: center;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  margin: auto;
 }
 
 .input-group {
@@ -76,6 +90,10 @@ button {
   margin: 20px 0px 0px 0px;
   width: 100%;
   gap: 20px;
+}
+
+.input-group input {
+  width: 100%;
 }
 
 button:active {
@@ -95,25 +113,13 @@ th, td {
 
 td input, td label, td button {
   width: 100%;
-  height: 40px;
+  height: 45px;
 }
 
 td input, td label {
-  border: 3px solid #333;
+  border: 3px solid var(--secondary-color);
   border-radius: 5px;
-  color: #e0e0e0;
-  text-align: center;
-}
-
-button {
-  border: 3px solid #76c7c0;
-  background-color: transparent;
-  color: #76c7c0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
+  color: var(--font-color);
 }
 
 .delete-row {
@@ -125,30 +131,21 @@ button {
 }
 
 button:hover {
-  background-color: #333;
+  background-image: linear-gradient(rgb(0 0 0/10%) 0 0);
 }
 
 #calculate {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
-  background-color: #76c7c0;
+  background-color: var(--main-color);
   color: #121212;
   font-size: 18px;
   cursor: pointer;
-  flex-grow: 1;
 }
 
-#error-border {
+.error-border {
   border: 3px solid #de8282;
-}
-
-#next-purchase {
-  flex-grow: 1;
-}
-
-#next-purchase input {
-  flex-grow: 2;
 }
 
 input[type="number"]::-webkit-outer-spin-button,

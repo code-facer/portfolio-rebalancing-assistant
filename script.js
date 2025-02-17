@@ -14,9 +14,9 @@ function updateCurrentAllocations() {
 function addRow() {
   const row = document.createElement('tr');
   row.innerHTML = `
-    <td><input type="number" class="position" placeholder="Current Position"></td>
+    <td><input type="number" class="position" placeholder="$"></td>
     <td><label class="current-allocation result">0.00%</label></td>
-    <td><input type="number" class="allocation" placeholder="Target Allocation (%)"></td>
+    <td><input type="number" class="allocation" placeholder="%"></td>
     <td><label class="next-purchase result">$0</label></td>
     <td><button type="button" class="delete-row">X</button></td>
   `;
@@ -44,27 +44,51 @@ function getNextPurchase() {
   return Number(document.getElementById('next-purchase').value) || 0;
 }
 
-function setAllocationError() {
+function addErrorClass(querySelector) {
   Array.from(getRows()).forEach(row => {
-    row.querySelector('.allocation').id = 'error-border';
+    row.querySelector(querySelector).classList.add('error-border');
   });
 }
 
-function unsetAllocationError() {
-  Array.from(document.querySelectorAll('#error-border')).forEach(input => {
-    input.removeAttribute('id');
+function unsetError() {
+  Array.from(document.querySelectorAll('.error-border')).forEach(input => {
+    input.classList.remove('error-border');
   });
+}
+
+function checkPositions() {
+  if (getPositions().some(pos => pos < 0 || pos > 1000000000 || !Number.isInteger(pos))) return false;
+}
+
+function checkTargetAllocations() {
+  const allocations = getDesiredAllocations();
+  let total = 0;
+
+  allocations.forEach(alloc => {
+    if (alloc < 0 || alloc > 100 || !Number.isInteger(alloc)) {
+      return false;
+    }
+    total += alloc;
+  });
+
+  return total === 100;
 }
 
 function rebalancePortfolio() {
 
-  if (checkTargetAllocations() === false) {
-    setAllocationError();
-    alert('Target allocations must be between 0% and 100% and sum to 100%');
+  if (checkPositions() === false) {
+    addErrorClass('.position');
+    alert('Positions must be an integer greater than 0 and less than $1,000,000,000');
     return;
   }
 
-  unsetAllocationError();
+  if (checkTargetAllocations() === false) {
+    addErrorClass('.allocation');
+    alert('Target allocations must be integers between 0 and 100 and sum to 100');
+    return;
+  }
+
+  unsetError();
 
   const positions = getPositions();
   const desiredAllocations = getDesiredAllocations();
@@ -93,19 +117,6 @@ function rebalancePortfolio() {
   displayNextPurchases(nextPurchases);
 }
 
-function checkTargetAllocations() {
-  const allocations = getDesiredAllocations();
-  let total = 0;
-
-  allocations.forEach(alloc => {
-    if (alloc < 0 || alloc > 100) {
-      return false;
-    }
-    total += alloc;
-  });
-
-  return total === 100;
-}
 
 function getPartialRebalancePurchases(remainingPurchase, underweightDeviations, numberOfPositions) {
   const nextPurchases = new Array(numberOfPositions).fill(0);
@@ -118,7 +129,7 @@ function getPartialRebalancePurchases(remainingPurchase, underweightDeviations, 
 
     const amountToAdd = Math.min(
       remainingPurchase,
-      sortedDeviations[1] ? sortedDeviations[1].deviation - minDeviation : minDeviation
+      sortedDeviations[1] ? minDeviation - sortedDeviations[1].deviation : minDeviation
     );
 
     groupIndices.forEach(index => {
