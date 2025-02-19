@@ -1,5 +1,5 @@
 :root {
-  --main-color: #0be5da;
+  --main-color: #22e7f5;
   --secondary-color: #464444;
   --error-color: #de8282;
   --font-color: #e0e0e0;
@@ -9,6 +9,15 @@
   box-sizing: border-box;
   font-size: medium;
   text-align: center;
+}
+
+input, button, td label {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+label[for="next-purchase"] {
+  font-size: large;
+  /* font-weight: bold; */
 }
 
 html, body {
@@ -41,6 +50,7 @@ h1 {
   color: var(--main-color);
   font-size: 2.5em;
   font-weight: bolder;
+  text-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
 form {
@@ -79,7 +89,6 @@ button {
   width: 100%;
   align-items: center;
   justify-content: center;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   margin: auto;
 }
 
@@ -139,7 +148,8 @@ button:hover {
   border: none;
   border-radius: 5px;
   background-color: var(--main-color);
-  color: #121212;
+  color: var(--font-color);
+  text-shadow: rgb(22, 103, 109, 0.6) 1px 0px 20px, rgb(22, 103, 109, 0.6) -1px 0px 20px, rgb(22, 103, 109, 0.6) 0px -1px 20px, rgb(22, 103, 109, 0.6) 0px 1px 20px;
   font-size: 18px;
   cursor: pointer;
 }
