@@ -11,6 +11,13 @@ function updateCurrentAllocations() {
   displayCurrentAllocations(allocations);
 }
 
+function updateNewAllocations(nextPurchases) {
+  const positions = getPositions();
+  const total = positions.reduce((acc, val) => acc + val, 0) + getNextPurchase();
+  const newAllocations = positions.map((pos, index) => total ? ((pos + nextPurchases[index]) / total) * 100 : 0);
+  displayNewAllocations(newAllocations);
+}
+
 function addRow() {
   const row = document.createElement('tr');
   row.innerHTML = `
@@ -18,6 +25,7 @@ function addRow() {
     <td><label class="current-allocation result">0.00%</label></td>
     <td><input type="number" class="allocation" placeholder="%"></td>
     <td><label class="next-purchase result">$0</label></td>
+    <td><label class="new-allocation result">0.00%</label></td>
     <td><button type="button" class="delete-row">X</button></td>
   `;
   row.querySelector('.delete-row').addEventListener('click', () => {
@@ -125,6 +133,7 @@ function rebalancePortfolio() {
   }
 
   displayNextPurchases(nextPurchases);
+  updateNewAllocations(nextPurchases);
 }
 
 
@@ -176,5 +185,11 @@ function displayNextPurchases(nextPurchases) {
 function displayCurrentAllocations(currentAllocations) {
   getRows().forEach((row, index) => {
     row.querySelector('.current-allocation').textContent = currentAllocations[index].toFixed(2) + '%';
+  });
+}
+
+function displayNewAllocations(newAllocations) {
+  getRows().forEach((row, index) => {
+    row.querySelector('.new-allocation').textContent = newAllocations[index].toFixed(2) + '%';
   });
 }

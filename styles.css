@@ -17,7 +17,6 @@ input, button, td label {
 
 label[for="next-purchase"] {
   font-size: large;
-  /* font-weight: bold; */
 }
 
 html, body {
@@ -26,8 +25,11 @@ html, body {
   width: 100%;
   height: 100%;
   font-family: Ubuntu, sans-serif;
-  background: rgb(2,0,36);
-  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(105,9,121,1) 35%, rgba(0,212,255,1) 100%);
+  background-image: radial-gradient(
+    farthest-corner at 40px 40px,
+    rgb(221, 70, 95) 0%,
+    #43e 100%
+  );
   color: #e0e0e0;
   display: flex;
   align-items: center;
