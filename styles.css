@@ -11,12 +11,13 @@
   text-align: center;
 }
 
-input, button, td label {
+input, button, td label, select {
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
-label[for="next-purchase"] {
+.input-group label{
   font-size: large;
+  font-weight: bold;
 }
 
 html, body {
@@ -66,13 +67,11 @@ label {
   display: flex;
   background-color: transparent;
   padding: 10px;
-  width: 100%;
   justify-content: center;
   text-align: center;
-  text-emphasis: strong;
 }
 
-input {
+input, select {
   background-color: var(--secondary-color);
   padding: 10px;
   border: 3px solid var(--secondary-color);
@@ -88,7 +87,6 @@ button {
   border-radius: 5px;
   color: var(--main-color);
   cursor: pointer;
-  width: 100%;
   align-items: center;
   justify-content: center;
   margin: auto;
@@ -98,13 +96,17 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 20px 0px 0px 0px;
+  margin: 5px 0px 0px 0px;
   width: 100%;
   gap: 20px;
 }
 
-.input-group input {
-  width: 100%;
+.input-group > * {
+  flex: 1;
+}
+
+.input-group select {
+  flex: 2 2 90px;
 }
 
 button:active {
@@ -138,7 +140,8 @@ td input, td label {
 }
 
 #add-row {
-  width: 200px;
+  width: 300px;
+  margin-bottom: 50px;
 }
 
 button:hover {

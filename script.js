@@ -52,6 +52,10 @@ function getNextPurchase() {
   return Number(document.getElementById('next-purchase').value) || 0;
 }
 
+function getStrategy() {
+  return document.getElementById('rebalancing-strategy').value;
+}
+
 function addErrorClass(querySelector) {
   Array.from(document.querySelectorAll(querySelector)).forEach(input => {
     input.classList.add('error-border');
@@ -126,14 +130,45 @@ function rebalancePortfolio() {
 
   let nextPurchases = Array(positions.length).fill(0);
 
-  if (underweightDeviations.length === deviations.length) {
-    nextPurchases = underweightDeviations.map(item => item.deviation);
-  } else if (underweightDeviations.length > 0) {
-    nextPurchases = getPartialRebalancePurchases(nextPurchase, underweightDeviations, positions.length);
+  const strategy = getStrategy();
+  
+  if (strategy === 'split') {
+    if (underweightDeviations.length === deviations.length) {
+      nextPurchases = underweightDeviations.map(item => item.deviation);
+    } else if (underweightDeviations.length > 0) {
+      nextPurchases = getPartialRebalancePurchases(nextPurchase, underweightDeviations, positions.length);
+    }
+  } else if (strategy === 'single') {
+    nextPurchases = getSingleRebalancePurchase(nextPurchase, underweightDeviations, deviations);
   }
 
   displayNextPurchases(nextPurchases);
   updateNewAllocations(nextPurchases);
+}
+
+function getSingleRebalancePurchase(remainingPurchase, underweightDeviations, deviations) {
+  const nextPurchases = new Array(deviations.length).fill(0);
+  
+  var minTotalDeviation = deviations.reduce((acc, val) => acc + Math.abs(val), 0);
+  var minDeviationIndex = 0;
+
+  // |a| + |b| + |c|
+  // a < 0
+  // |p+a| instead of |a|
+
+  underweightDeviations.forEach(element => {
+    if (element.deviation > 0) {
+      var currentDeviation = minTotalDeviation - element.deviation;
+      currentDeviation += Math.abs(remainingPurchase - element.deviation);
+      if (currentDeviation < minTotalDeviation) {
+        minTotalDeviation = currentDeviation;
+        minDeviationIndex = element.index;
+      }
+    }
+  });
+
+  nextPurchases[minDeviationIndex] = remainingPurchase;
+  return nextPurchases;
 }
 
 
